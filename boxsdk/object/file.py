@@ -49,17 +49,17 @@ class File(Item):
         Get the content of a file on Box.
 
         :param byte_range:
-            A list of two ints. These are the range value in bytes.
+            A sequence of two ints. If specified, only bytes in the specified range will be transferred from Box.
         :type byte_range:
-            `[int, int]`
+            `(int, int)`
         :returns:
             File content as bytes.
         :rtype:
             `bytes`
         """
         headers = None
-        if byte_range and len(byte_range) > 1:
-            headers = {'Range': 'bytes=%d-%d' % (byte_range[0], byte_range[1])}
+        if byte_range and len(byte_range) == 2:
+            headers = {'Range': 'bytes={0}-{1}'.format(*byte_range)}
         url = self.get_url('content')
         box_response = self._session.get(url, expect_json_response=False, headers=headers)
         return box_response.content
@@ -73,13 +73,13 @@ class File(Item):
         :type writeable_stream:
             `file`
         :param byte_range:
-            A list of two ints. These are the range value in bytes.
+            A sequence of two ints. If specified, only bytes in the specified range will be transferred from Box.
         :type byte_range:
-            `[int, int]`
+            `(int, int)`
         """
         headers = None
-        if byte_range and len(byte_range) > 1:
-            headers = {'Range': 'bytes=%d-%d' % (byte_range[0], byte_range[1])}
+        if byte_range and len(byte_range) == 2:
+            headers = {'Range': 'bytes={0}-{1}'.format(*byte_range)}
         url = self.get_url('content')
         box_response = self._session.get(url, expect_json_response=False, stream=True, headers=headers)
         for chunk in box_response.network_response.response_as_stream.stream(decode_content=True):

@@ -47,7 +47,24 @@ def test_download_to(test_file, mock_box_session, mock_content_response):
     test_file.download_to(mock_writeable_stream)
     mock_writeable_stream.seek(0)
     assert mock_writeable_stream.read() == mock_content_response.content
-    mock_box_session.get.assert_called_once_with(expected_url, expect_json_response=False, stream=True)
+    mock_box_session.get.assert_called_once_with(expected_url, expect_json_response=False, stream=True, headers=None)
+
+
+def test_download_to_with_range(test_file, mock_box_session, mock_content_response):
+    expected_url = test_file.get_url('content')
+    mock_box_session.get.return_value = mock_content_response
+    mock_writeable_stream = BytesIO()
+    byte_range = (10, 20)
+    expected_headers = {'Range': 'bytes={0}-{1}'.format(*byte_range)}
+    test_file.download_to(mock_writeable_stream, byte_range=byte_range)
+    mock_writeable_stream.seek(0)
+    assert mock_writeable_stream.read() == mock_content_response.content
+    mock_box_session.get.assert_called_once_with(
+        expected_url,
+        expect_json_response=False,
+        stream=True,
+        headers=expected_headers,
+    )
 
 
 def test_get_content(test_file, mock_box_session, mock_content_response):
@@ -55,7 +72,17 @@ def test_get_content(test_file, mock_box_session, mock_content_response):
     mock_box_session.get.return_value = mock_content_response
     file_content = test_file.content()
     assert file_content == mock_content_response.content
-    mock_box_session.get.assert_called_once_with(expected_url, expect_json_response=False)
+    mock_box_session.get.assert_called_once_with(expected_url, expect_json_response=False, headers=None)
+
+
+def test_get_content_with_range(test_file, mock_box_session, mock_content_response):
+    expected_url = test_file.get_url('content')
+    mock_box_session.get.return_value = mock_content_response
+    byte_range = (10, 20)
+    expected_headers = {'Range': 'bytes={0}-{1}'.format(*byte_range)}
+    file_content = test_file.content(byte_range=byte_range)
+    assert file_content == mock_content_response.content
+    mock_box_session.get.assert_called_once_with(expected_url, expect_json_response=False, headers=expected_headers)
 
 
 @pytest.mark.parametrize('is_stream', (True, False))
