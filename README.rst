@@ -52,8 +52,10 @@ token. You might want to define something like this:
 
 .. code-block:: python
 
-    def store_tokens(access_token, refresh_token):
+    def store_tokens(access_token, refresh_token, context):
         # store the tokens at secure storage (e.g. Keychain)
+
+context can be used to pass additional information to the store_tokens callback.
 
 The SDK will keep the tokens in memory for the duration of the Python
 script run, so you don't always need to pass store_tokens.
