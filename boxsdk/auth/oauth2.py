@@ -23,6 +23,7 @@ class OAuth2(object):
             client_id,
             client_secret,
             store_tokens=None,
+            store_tokens_context=None,
             box_device_id='0',
             box_device_name='',
             access_token=None,
@@ -42,6 +43,10 @@ class OAuth2(object):
             Optional callback for getting access to tokens for storing them.
         :type store_tokens:
             `callable`
+        :param store_tokens_context:
+            Optional context for passing to store_tokens callback
+        :type store_tokens:
+            `object`
         :param box_device_id:
             Optional unique ID of this device. Used for applications that want to support device-pinning.
         :type box_device_id:
@@ -66,6 +71,7 @@ class OAuth2(object):
         self._client_id = client_id
         self._client_secret = client_secret
         self._store_tokens = store_tokens
+        self._store_tokens_context = store_tokens_context
         self._access_token = access_token
         self._refresh_token = refresh_token
         self._network_layer = network_layer if network_layer else DefaultNetwork()
@@ -232,5 +238,5 @@ class OAuth2(object):
         except (ValueError, KeyError):
             raise BoxOAuthException(network_response.status_code, network_response.content, url, 'POST')
         if self._store_tokens:
-            self._store_tokens(self._access_token, self._refresh_token)
+            self._store_tokens(self._access_token, self._refresh_token, self._store_tokens_context)
         return self._access_token, self._refresh_token
